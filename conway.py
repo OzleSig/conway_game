@@ -5,28 +5,27 @@ pygame.init()
 
 window_size = 800
 surface = pygame.display.set_mode((window_size, window_size))
-box_number = 10
+box_number = 50
 box_size = window_size/box_number
 black = (0, 0, 0)
 white = (255, 255,255)
 running = True
 cells = [[0 for i in range(box_number)] for i in range(box_number)]
+neigh_nums = [[0 for i in range(box_number)] for i in range(box_number)]
 mouse_down = False
 pause = True
 
 def neighbour(y_index, x_index):
-        neighbour = 0
-        for y_mod in range(2):
+        neigh_nums[y_index][x_index] = 0
+        for y_mod in range(3):
             y_mod_index = y_mod-1
             y_neigh = y_index+y_mod_index
-            for x_mod in range(2):
+            for x_mod in range(3):
                 x_mod_index = x_mod-1
                 x_neigh = x_index+x_mod_index
-                if not y_mod_index == x_mod_index == 0:
-                    neighbour = neighbour+cells[y_neigh][x_neigh]
-                    if neighbour> 0:
-                        return neighbour
-
+                if not (y_mod_index == x_mod_index == 0 or y_neigh<0 or x_neigh<0 or y_neigh>=box_number or x_neigh>=box_number):
+                    if cells[y_neigh][x_neigh] == 1:
+                        neigh_nums[y_index][x_index] += 1
 
 def update():
     if mouse_down:
@@ -39,6 +38,12 @@ def update():
         for y_index in range(box_number):
             for x_index in range(box_number):
                 neighbour(y_index, x_index)
+        for y_index in range(box_number):
+            for x_index in range(box_number):
+                if neigh_nums[y_index][x_index]>3 or neigh_nums[y_index][x_index]<2:
+                    cells[y_index][x_index] = 0
+                if neigh_nums[y_index][x_index]==3:
+                    cells[y_index][x_index] = 1                
 
 def handle_events(event):
     global mouse_down
@@ -47,11 +52,12 @@ def handle_events(event):
         mouse_down = True
     elif event.type == MOUSEBUTTONUP:
         mouse_down = False
-    elif event.type == KEYDOWN and event.key == K_SPACE:
-        if pause == True:
-            pause = False
-        else:
-            pause = True
+    elif event.type == KEYDOWN:
+        if event.key == K_SPACE:
+            if pause == True:
+                pause = False
+            else:
+                pause = True
     
 def render():
     surface.fill(white)
@@ -68,12 +74,12 @@ def render():
 def game_loop():
     global running
     while running:
-        render()
-        #time.sleep(3)
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
             handle_events(event)
-        update()
+        render()
         pygame.display.flip()
+        time.sleep(1)
+        update()
 game_loop()
