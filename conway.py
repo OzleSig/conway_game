@@ -79,7 +79,6 @@ def game_loop():
                 running = False
             handle_events(event)
         render()
-        pygame.display.flip()
-        time.sleep(1)
         update()
+        pygame.display.flip()
 game_loop()
