@@ -14,6 +14,7 @@ cells = [[0 for i in range(box_number)] for i in range(box_number)]
 neigh_nums = [[0 for i in range(box_number)] for i in range(box_number)]
 mouse_down = False
 pause = True
+time1 = time.time()
 
 def neighbour(y_index, x_index):
         neigh_nums[y_index][x_index] = 0
@@ -27,13 +28,15 @@ def neighbour(y_index, x_index):
                     if cells[y_neigh][x_neigh] == 1:
                         neigh_nums[y_index][x_index] += 1
 
+def draw():
+        if mouse_down:
+            mouse_pos = pygame.mouse.get_pos()
+            if not (mouse_pos[0] < 0 or mouse_pos[1] < 0 or mouse_pos[0]>= window_size or mouse_pos[1] >= window_size):
+                x = int((mouse_pos[0]*box_number)/window_size)
+                y = int((mouse_pos[1]*box_number)/window_size)
+                cells[y][x] = 1
+
 def update():
-    if mouse_down:
-        mouse_pos = pygame.mouse.get_pos()
-        if not (mouse_pos[0] < 0 or mouse_pos[1] < 0 or mouse_pos[0]>= window_size or mouse_pos[1] >= window_size):
-            x = int((mouse_pos[0]*box_number)/window_size)
-            y = int((mouse_pos[1]*box_number)/window_size)
-            cells[y][x] = 1
     if not pause:
         for y_index in range(box_number):
             for x_index in range(box_number):
@@ -73,12 +76,18 @@ def render():
 
 def game_loop():
     global running
+    global time1
     while running:
+        time2 = time.time()
+        elapsed = time2 - time1
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
             handle_events(event)
         render()
-        update()
+        draw()
+        if elapsed >= (1/5):
+            time1 = time2
+            update()
         pygame.display.flip()
 game_loop()
